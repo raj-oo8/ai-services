@@ -5,7 +5,7 @@ namespace Azure.AI.Services.SemanticKernel
 {
     internal class Program
     {
-        public static void Main()
+        public static async Task Main()
         {
             var serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection);
@@ -27,7 +27,7 @@ namespace Azure.AI.Services.SemanticKernel
             {
                 try
                 {
-                    orchestrator.ChatAsync(cts.Token).Wait();
+                    await orchestrator.ChatAsync(cts.Token);
                 }
                 catch (OperationCanceledException)
                 {
