@@ -93,6 +93,13 @@ namespace Azure.AI.Services.SemanticKernel
             string? userInput;
             while ((userInput = Console.ReadLine()) != null)
             {
+                // Check if user input is 'exit'
+                if (userInput.Trim().ToLower() == "exit")
+                {
+                    Console.WriteLine("Exit command received. Terminating application...");
+                    Environment.Exit(0);
+                }
+
                 // Check if cancellation has been requested
                 if (ct.IsCancellationRequested)
                 {
