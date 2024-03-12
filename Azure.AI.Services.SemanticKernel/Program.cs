@@ -83,7 +83,7 @@ namespace Azure.AI.Services.SemanticKernel
             // <RunningNativeFunction>
             var builder = Kernel.CreateBuilder()
                                 .AddAzureOpenAIChatCompletion(modelId, endpoint, apiKey);
-            //builder.Plugins.AddFromType<MathPlugin>();
+            builder.Plugins.AddFromType<TimePlugin>();
             Kernel kernel = builder.Build();
 
             // Create chat history
@@ -116,15 +116,15 @@ namespace Azure.AI.Services.SemanticKernel
                 history.AddUserMessage(userInput);
 
                 // Enable auto function calling
-                //OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
-                //{
-                //    ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
-                //};
+                OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
+                {
+                    ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
+                };
 
                 // Get the response from the AI
                 var result = chatCompletionService.GetStreamingChatMessageContentsAsync(
                                     history,
-                                    //executionSettings: openAIPromptExecutionSettings,
+                                    executionSettings: openAIPromptExecutionSettings,
                                     kernel: kernel);
 
                 // Stream the results
