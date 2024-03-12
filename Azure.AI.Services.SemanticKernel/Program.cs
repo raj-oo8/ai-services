@@ -26,15 +26,21 @@ namespace Azure.AI.Services.SemanticKernel
             };
 
             // Resolve your class from the service provider
-            var orchestrator = serviceProvider.GetService<Orchestrator>();
-            try
+            Orchestrator? orchestrator = serviceProvider.GetService<Orchestrator>();
+            if (orchestrator != null)
             {
-                // Pass the cancellation token to your method
-                orchestrator.ChatAsync(cts.Token).Wait();
+                try
+                {
+                    orchestrator.ChatAsync(cts.Token).Wait();
+                }
+                catch (OperationCanceledException)
+                {
+                    Console.WriteLine("Operation was cancelled. Exiting...");
+                }
             }
-            catch (OperationCanceledException)
+            else
             {
-                Console.WriteLine("Operation was cancelled. Exiting...");
+                Console.WriteLine("Failed to resolve Orchestrator from the service provider.");
             }
         }
 
