@@ -25,6 +25,7 @@ namespace Azure.AI.Services.SemanticKernel
         {
             if (endpoint is null || modelId is null || apiKey is null)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Azure OpenAI credentials not found. Skipping example.");
                 return;
             }
@@ -42,6 +43,7 @@ namespace Azure.AI.Services.SemanticKernel
             var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
 
             // Start the conversation
+            Console.ForegroundColor = ConsoleColor.Blue;
             Console.Write("User > ");
             string? userInput;
             while ((userInput = Console.ReadLine()) != null)
@@ -49,6 +51,7 @@ namespace Azure.AI.Services.SemanticKernel
                 // Check if user input is 'exit'
                 if (userInput.Trim().Equals("exit", StringComparison.CurrentCultureIgnoreCase))
                 {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Exit command received. Terminating application...");
                     Environment.Exit(0);
                 }
@@ -56,6 +59,7 @@ namespace Azure.AI.Services.SemanticKernel
                 // Check if cancellation has been requested
                 if (ct.IsCancellationRequested)
                 {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Cancellation requested. Exiting loop...");
                     break;
                 }
@@ -77,6 +81,7 @@ namespace Azure.AI.Services.SemanticKernel
 
                 try
                 {
+                    Console.ForegroundColor = ConsoleColor.Green;
                     await foreach (var content in result)
                     {
                         if (content.Role.HasValue && first)
@@ -87,10 +92,11 @@ namespace Azure.AI.Services.SemanticKernel
                         Console.Write(content.Content);
                         fullMessage += content.Content;
                     }
-                    Console.WriteLine();
+                    Console.WriteLine("\n");
                 }
                 catch (Exception exception)
                 {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine($"Error: {exception.Message}");
                 }
 
@@ -98,6 +104,7 @@ namespace Azure.AI.Services.SemanticKernel
                 history.AddAssistantMessage(fullMessage);
 
                 // Get user input again
+                Console.ForegroundColor = ConsoleColor.Blue;
                 Console.Write("User > ");
             }
         }
