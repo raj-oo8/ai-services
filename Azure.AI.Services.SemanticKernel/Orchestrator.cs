@@ -5,32 +5,39 @@ using Microsoft.SemanticKernel.Connectors.AzureAISearch;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Plugins.Core;
+using Microsoft.SemanticKernel.Plugins.Memory;
 
-// Memory functionality is experimental
-#pragma warning disable SKEXP0001, SKEXP0003, SKEXP0010, SKEXP0050, SKEXP0011, SKEXP0020
+#pragma warning disable SKEXP0001, SKEXP0003, SKEXP0010, SKEXP0020
 
 namespace Azure.AI.Services.SemanticKernel
 {
     internal class Orchestrator
     {
         private readonly IConfiguration _configuration;
-        readonly string? endpoint;
+
         readonly string? chatModelId;
-        readonly string? apiKey;
         readonly string? embeddingsModelId;
+        readonly string? azureOpenAIEndpoint;
+        readonly string? azureOpenAIApiKey;
+        readonly string? azureAISearchEndpoint;
+        readonly string? azureAISearchApiKey;
+
 
         public Orchestrator(IConfiguration configuration)
         {
             _configuration = configuration;
-            endpoint = _configuration["AzureOpenAI:Endpoint"];
+
             chatModelId = _configuration["AzureOpenAI:ChatModelId"];
-            embeddingsModelId = _configuration["AzureOpenAI:EmbeddingsModelId"];  
-            apiKey = _configuration["AzureOpenAI:ApiKey"];
+            embeddingsModelId = _configuration["AzureOpenAI:EmbeddingsModelId"];
+            azureOpenAIEndpoint = _configuration["AzureOpenAI:Endpoint"];
+            azureOpenAIApiKey = _configuration["AzureOpenAI:ApiKey"];
+            azureAISearchEndpoint = _configuration["AzureAISearch:Endpoint"];
+            azureAISearchApiKey = _configuration["AzureAISearch:ApiKey"];
         }
 
         public async Task ChatAsync(CancellationToken ct)
         {
-            if (endpoint is null || chatModelId is null || apiKey is null || embeddingsModelId is null)
+            if (azureOpenAIEndpoint is null || chatModelId is null || azureOpenAIApiKey is null || embeddingsModelId is null || azureAISearchApiKey is null || azureAISearchEndpoint is null)
             {
                 Console.WriteLine("Azure OpenAI credentials not found. Skipping example.");
                 return;
@@ -38,13 +45,16 @@ namespace Azure.AI.Services.SemanticKernel
 
             // <RunningNativeFunction>
             var builder = Kernel.CreateBuilder()
-                                .AddAzureOpenAIChatCompletion(nameof(Orchestrator), endpoint, apiKey, modelId: chatModelId);
+                                .AddAzureOpenAIChatCompletion(nameof(Orchestrator), azureOpenAIEndpoint, azureOpenAIApiKey, modelId: chatModelId);
             builder.Plugins.AddFromType<TimePlugin>();
             Kernel kernel = builder.Build();
 
             var memoryBuilder = new MemoryBuilder();
-            memoryBuilder.WithAzureOpenAITextEmbeddingGeneration(nameof(Orchestrator), endpoint, apiKey, embeddingsModelId);
-            //memoryBuilder.WithMemoryStore(new AzureAISearchMemoryStore(AZURE_SEARCH_ENDPOINT, AZURE_SEARCH_API_KEY));
+            memoryBuilder.WithAzureOpenAITextEmbeddingGeneration(nameof(Orchestrator), azureOpenAIEndpoint, azureOpenAIApiKey, embeddingsModelId);
+            memoryBuilder.WithMemoryStore(new AzureAISearchMemoryStore(azureAISearchEndpoint, azureAISearchApiKey));
+            var memory = memoryBuilder.Build();
+
+            kernel.ImportPluginFromObject(new TextMemoryPlugin(memory));
 
             // Create chat history
             ChatHistory history = [];
