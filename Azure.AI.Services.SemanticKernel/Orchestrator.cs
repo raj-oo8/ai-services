@@ -1,8 +1,8 @@
-﻿using Microsoft.SemanticKernel;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Plugins.Core;
-using Microsoft.Extensions.Configuration;
 
 namespace Azure.AI.Services.SemanticKernel
 {
@@ -38,8 +38,6 @@ namespace Azure.AI.Services.SemanticKernel
             // Create chat history
             ChatHistory history = [];
 
-            // <Chat>
-
             // Get chat completion service
             var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
 
@@ -49,7 +47,7 @@ namespace Azure.AI.Services.SemanticKernel
             while ((userInput = Console.ReadLine()) != null)
             {
                 // Check if user input is 'exit'
-                if (userInput.Trim().ToLower() == "exit")
+                if (userInput.Trim().Equals("exit", StringComparison.CurrentCultureIgnoreCase))
                 {
                     Console.WriteLine("Exit command received. Terminating application...");
                     Environment.Exit(0);
@@ -71,25 +69,30 @@ namespace Azure.AI.Services.SemanticKernel
                 };
 
                 // Get the response from the AI
-                var result = chatCompletionService.GetStreamingChatMessageContentsAsync(
-                                    history,
-                                    executionSettings: openAIPromptExecutionSettings,
-                                    kernel: kernel);
+                var result = chatCompletionService.GetStreamingChatMessageContentsAsync(history, executionSettings: openAIPromptExecutionSettings, kernel: kernel, cancellationToken: ct);
 
                 // Stream the results
                 string fullMessage = "";
                 var first = true;
-                await foreach (var content in result)
+
+                try
                 {
-                    if (content.Role.HasValue && first)
+                    await foreach (var content in result)
                     {
-                        Console.Write("Assistant > ");
-                        first = false;
+                        if (content.Role.HasValue && first)
+                        {
+                            Console.Write("Assistant > ");
+                            first = false;
+                        }
+                        Console.Write(content.Content);
+                        fullMessage += content.Content;
                     }
-                    Console.Write(content.Content);
-                    fullMessage += content.Content;
+                    Console.WriteLine();
                 }
-                Console.WriteLine();
+                catch (Exception exception)
+                {
+                    Console.WriteLine($"Error: {exception.Message}");
+                }
 
                 // Add the message from the agent to the chat history
                 history.AddAssistantMessage(fullMessage);
