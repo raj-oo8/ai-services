@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Azure.AI.OpenAI;
+using Azure.Search.Documents;
+using Azure.Search.Documents.Indexes;
+using Microsoft.Extensions.Configuration;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.AzureAISearch;
@@ -7,7 +10,7 @@ using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Plugins.Core;
 using Microsoft.SemanticKernel.Plugins.Memory;
 
-//#pragma warning disable SKEXP0001, SKEXP0003, SKEXP0010, SKEXP0020
+#pragma warning disable SKEXP0001, SKEXP0003, SKEXP0010, SKEXP0020
 
 namespace Azure.AI.Services.SemanticKernel
 {
@@ -46,16 +49,16 @@ namespace Azure.AI.Services.SemanticKernel
 
             // <RunningNativeFunction>
             var builder = Kernel.CreateBuilder()
-                                .AddAzureOpenAIChatCompletion(nameof(Orchestrator), azureOpenAIEndpoint, azureOpenAIApiKey, modelId: chatModelId);
+                                .AddAzureOpenAIChatCompletion(chatModelId, azureOpenAIEndpoint, azureOpenAIApiKey);
             builder.Plugins.AddFromType<TimePlugin>();
             Kernel kernel = builder.Build();
 
-            //var memoryBuilder = new MemoryBuilder();
-            //memoryBuilder.WithAzureOpenAITextEmbeddingGeneration(nameof(Orchestrator), azureOpenAIEndpoint, azureOpenAIApiKey, embeddingsModelId);
-            //memoryBuilder.WithMemoryStore(new AzureAISearchMemoryStore(azureAISearchEndpoint, azureAISearchApiKey));
-            //var memory = memoryBuilder.Build();
-
-            //kernel.ImportPluginFromObject(new TextMemoryPlugin(memory));
+            //https://github.com/microsoft/semantic-kernel/blob/main/dotnet/notebooks/06-memory-and-embeddings.ipynb
+            var memoryBuilder = new MemoryBuilder();
+            memoryBuilder.WithAzureOpenAITextEmbeddingGeneration(embeddingsModelId, azureOpenAIEndpoint, azureOpenAIApiKey);
+            memoryBuilder.WithMemoryStore(new AzureAISearchMemoryStore(azureAISearchEndpoint, azureAISearchApiKey));
+            var memory = memoryBuilder.Build();
+            kernel.ImportPluginFromObject(new TextMemoryPlugin(memory));
 
             // Create chat history
             ChatHistory history = [];
