@@ -4,15 +4,5 @@ namespace Azure.AI.Services.Teams
     {
         public string BOT_ID { get; set; }
         public string BOT_PASSWORD { get; set; }
-        public OpenAIConfigOptions OpenAI { get; set; }
-    }
-
-    /// <summary>
-    /// Options for Open AI
-    /// </summary>
-    public class OpenAIConfigOptions
-    {
-        public string ApiKey { get; set; }
-        public string AssistantId { get; set; }
     }
 }
