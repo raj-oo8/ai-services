@@ -5,18 +5,7 @@
 			"commandName": "Project",
 			"dotnetRunMessages": true,
 			"launchBrowser": true,
-			"launchUrl": "https://teams.microsoft.com/l/app/769d5c96-7f31-44d2-b7b9-89a7de7bca25?installAppPackage=true&webjoin=true&appTenantId=856766dd-7c1e-4c8c-8327-5476c947f877&login_hint=rajs@zjmmb.onmicrosoft.com",
-			"applicationUrl": "http://localhost:5130",
-			"environmentVariables": {
-				"ASPNETCORE_ENVIRONMENT": "Development"
-			},
-			"hotReloadProfile": "aspnetcore"
-		},
-		"Outlook (browser)": {
-			"commandName": "Project",
-			"dotnetRunMessages": true,
-			"launchBrowser": true,
-			"launchUrl": "https://outlook.office.com/mail?login_hint=rajs@zjmmb.onmicrosoft.com",
+			"launchUrl": "https://teams.microsoft.com/l/app/52a13451-aef5-4030-a46c-6e2f99bfc42b?installAppPackage=true&webjoin=true&appTenantId=856766dd-7c1e-4c8c-8327-5476c947f877&login_hint=rajs@zjmmb.onmicrosoft.com",
 			"applicationUrl": "http://localhost:5130",
 			"environmentVariables": {
 				"ASPNETCORE_ENVIRONMENT": "Development"

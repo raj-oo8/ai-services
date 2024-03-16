@@ -4,12 +4,21 @@ using Microsoft.Bot.Schema;
 using Microsoft.Bot.Schema.Teams;
 using AdaptiveCards;
 using Newtonsoft.Json.Linq;
+using Azure.Search.Documents.Models;
+using System.Diagnostics;
 
 namespace Azure.AI.Services.Teams.Search;
 
 public class SearchApp : TeamsActivityHandler
 {
     private readonly string _adaptiveCardFilePath = Path.Combine(".", "Resources", "helloWorldCard.json");
+    private readonly AISearch _aiSearch;
+
+    public SearchApp(AISearch aiSearch)
+    {
+        _aiSearch = aiSearch;
+    }
+
     // Search
     protected override async Task<MessagingExtensionResponse> OnTeamsMessagingExtensionQueryAsync(ITurnContext<IInvokeActivity> turnContext, MessagingExtensionQuery query, CancellationToken cancellationToken)
     {
@@ -17,24 +26,19 @@ public class SearchApp : TeamsActivityHandler
         var template = new AdaptiveCards.Templating.AdaptiveCardTemplate(templateJson);
 
         var text = query?.Parameters?[0]?.Value as string ?? string.Empty;
-        var packages = await FindPackages(text);
-        // We take every row of the results and wrap them in cards wrapped in in MessagingExtensionAttachment objects.
-        var attachments = packages.Select(package =>
+        var hybridResponse = await _aiSearch.SemanticHybridSearch(text);
+        var attachments = new List<MessagingExtensionAttachment>();
+        Debug.WriteLine($"Hybrid Search Results:");
+        await foreach (SearchResult<SearchDocument> result in hybridResponse.GetResultsAsync())
         {
-            var previewCard = new ThumbnailCard { Title = package.Item1 };
+            Debug.WriteLine($"Title: {result.Document["title"]}");
+            Debug.WriteLine($"Url: {result.Document["url"]}");
+            Debug.WriteLine($"Content: {result.Document["content"]}");
+            Debug.WriteLine($"Filepath: {result.Document["filepath"]}\n");
 
-            var adaptiveCardJson = template.Expand(new { name = package.Item1, description = package.Item3 });
+            var previewCard = new HeroCard { Title = result.Document["filepath"].ToString(), Text = result.Document["content"].ToString() };
+            var adaptiveCardJson = template.Expand(new { content = result.Document["content"], filepath = result.Document["filepath"], url = result.Document["url"] });
             var adaptiveCard = AdaptiveCard.FromJson(adaptiveCardJson).Card;
-            if (!string.IsNullOrEmpty(package.Item5))
-            {
-                previewCard.Images = new List<CardImage>() { new CardImage(package.Item5, "Icon") };
-                adaptiveCard.Body.Insert(0, new AdaptiveImage()
-                {
-                    Url = new Uri(package.Item5),
-                    Style = AdaptiveImageStyle.Person,
-                    Size = AdaptiveImageSize.Small,
-                });
-            }
             var attachment = new MessagingExtensionAttachment
             {
                 ContentType = AdaptiveCard.ContentType,
@@ -42,9 +46,9 @@ public class SearchApp : TeamsActivityHandler
                 Preview = previewCard.ToAttachment()
             };
 
-            return attachment;
-        }).ToList();
+            attachments.Add(attachment);
 
+        }
         return new MessagingExtensionResponse
         {
             ComposeExtension = new MessagingExtensionResult
@@ -54,19 +58,5 @@ public class SearchApp : TeamsActivityHandler
                 Attachments = attachments
             }
         };
-    }
-
-    // Generate a set of substrings to illustrate the idea of a set of results coming back from a query. 
-    private async Task<IEnumerable<(string, string, string, string, string)>> FindPackages(string text)
-    {
-        var httpClient = new HttpClient();
-        var response = await httpClient.GetStringAsync($"https://azuresearch-usnc.nuget.org/query?q=id:{text}&prerelease=true");
-        var obj = JObject.Parse(response);
-        return obj["data"].Select(item => (
-            item["id"].ToString(),
-            item["version"].ToString(),
-            item["description"].ToString(),
-            item["projectUrl"]?.ToString(),
-            item["iconUrl"]?.ToString()));
     }
 }

@@ -3,15 +3,16 @@
   "body": [
     {
       "type": "TextBlock",
-      "text": "${name}",
+      "text": "${content}",
       "wrap": true,
       "size": "Large"
-    },
+    }
+  ],
+  "actions": [
     {
-      "type": "TextBlock",
-      "text": "${description}",
-      "wrap": true,
-      "size": "Medium"
+      "type": "Action.OpenUrl",
+      "title": "${filepath}",
+      "url": "${url}"
     }
   ],
   "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",

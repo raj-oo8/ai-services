@@ -15,11 +15,19 @@ var config = builder.Configuration.Get<ConfigOptions>();
 builder.Configuration["MicrosoftAppType"] = "MultiTenant";
 builder.Configuration["MicrosoftAppId"] = config.BOT_ID;
 builder.Configuration["MicrosoftAppPassword"] = config.BOT_PASSWORD;
+builder.Configuration["AZURE_OPENAI_SERVICE_NAME"] = config.AZURE_OPENAI_SERVICE_NAME;
+builder.Configuration["AZURE_OPENAI_DEPLOYMENT_NAME"] = config.AZURE_OPENAI_DEPLOYMENT_NAME;
+builder.Configuration["AZURE_OPENAI_API_VERSION"] = config.AZURE_OPENAI_API_VERSION;
+builder.Configuration["AZURE_OPENAI_API_KEY"] = config.AZURE_OPENAI_API_KEY;
+builder.Configuration["AZURE_SEARCH_ENDPOINT"] = config.AZURE_SEARCH_ENDPOINT;
+builder.Configuration["AZURE_SEARCH_ADMIN_KEY"] = config.AZURE_SEARCH_ADMIN_KEY;
+builder.Configuration["AZURE_SEARCH_INDEX_NAME"] = config.AZURE_SEARCH_INDEX_NAME;
 builder.Services.AddSingleton<BotFrameworkAuthentication, ConfigurationBotFrameworkAuthentication>();
 
 // Create the Bot Framework Adapter with error handling enabled.
 builder.Services.AddSingleton<IBotFrameworkHttpAdapter, AdapterWithErrorHandler>();
 
+builder.Services.AddTransient<AISearch>();
 // Create the bot as a transient. In this case the ASP Controller is expecting an IBot.
 builder.Services.AddTransient<IBot, SearchApp>();
 
