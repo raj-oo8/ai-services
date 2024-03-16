@@ -39,6 +39,7 @@ namespace Azure.AI.Services.SemanticKernel
         {
             if (azureOpenAIEndpoint is null || chatModelId is null || azureOpenAIApiKey is null || embeddingsModelId is null || azureAISearchApiKey is null || azureAISearchEndpoint is null)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Azure OpenAI credentials not found. Skipping example.");
                 return;
             }
@@ -63,6 +64,7 @@ namespace Azure.AI.Services.SemanticKernel
             var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
 
             // Start the conversation
+            Console.ForegroundColor = ConsoleColor.Blue;
             Console.Write("User > ");
             string? userInput;
             while ((userInput = Console.ReadLine()) != null)
@@ -70,6 +72,7 @@ namespace Azure.AI.Services.SemanticKernel
                 // Check if user input is 'exit'
                 if (userInput.Trim().Equals("exit", StringComparison.CurrentCultureIgnoreCase))
                 {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Exit command received. Terminating application...");
                     Environment.Exit(0);
                 }
@@ -77,6 +80,7 @@ namespace Azure.AI.Services.SemanticKernel
                 // Check if cancellation has been requested
                 if (ct.IsCancellationRequested)
                 {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Cancellation requested. Exiting loop...");
                     break;
                 }
@@ -95,22 +99,33 @@ namespace Azure.AI.Services.SemanticKernel
                 // Stream the results
                 string fullMessage = "";
                 var first = true;
-                await foreach (var content in result)
+
+                try
                 {
-                    if (content.Role.HasValue && first)
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    await foreach (var content in result)
                     {
-                        Console.Write("Assistant > ");
-                        first = false;
+                        if (content.Role.HasValue && first)
+                        {
+                            Console.Write("Assistant > ");
+                            first = false;
+                        }
+                        Console.Write(content.Content);
+                        fullMessage += content.Content;
                     }
-                    Console.Write(content.Content);
-                    fullMessage += content.Content;
+                    Console.WriteLine("\n");
                 }
-                Console.WriteLine();
+                catch (Exception exception)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"Error: {exception.Message}");
+                }
 
                 // Add the message from the agent to the chat history
                 history.AddAssistantMessage(fullMessage);
 
                 // Get user input again
+                Console.ForegroundColor = ConsoleColor.Blue;
                 Console.Write("User > ");
             }
         }
