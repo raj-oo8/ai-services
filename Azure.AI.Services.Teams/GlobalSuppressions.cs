@@ -6,3 +6,4 @@
 using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("Usage", "ASP0014:Suggest using top level route registrations", Justification = "<Pending>")]
+[assembly: SuppressMessage("Style", "IDE0290:Use primary constructor", Justification = "<Pending>", Scope = "member", Target = "~M:Azure.AI.Services.Teams.Search.AISearch.#ctor(Microsoft.Extensions.Configuration.IConfiguration)")]

@@ -67,7 +67,7 @@ namespace Azure.AI.Services.Teams.Search
             // Initialize OpenAI client  
             var credential = new AzureKeyCredential(openaiApiKey);
             var openAIClient = new OpenAIClient(new Uri(openaiEndpoint), credential);
-            var response = await openAIClient.GetEmbeddingsAsync(new EmbeddingsOptions(deploymentName, new List<string> { text }));
+            var response = await openAIClient.GetEmbeddingsAsync(new EmbeddingsOptions(deploymentName, [text]));
             return response.Value.Data[0].Embedding;
         }
 
