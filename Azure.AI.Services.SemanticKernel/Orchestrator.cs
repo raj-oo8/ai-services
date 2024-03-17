@@ -1,6 +1,8 @@
 ﻿using Azure.AI.OpenAI;
+using Azure.Identity;
 using Azure.Search.Documents;
 using Azure.Search.Documents.Indexes;
+using Azure.Security.KeyVault.Secrets;
 using Microsoft.Extensions.Configuration;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
@@ -21,42 +23,48 @@ namespace Azure.AI.Services.SemanticKernel
         readonly string? chatModelId;
         readonly string? embeddingsModelId;
         readonly string? azureOpenAIEndpoint;
-        readonly string? azureOpenAIApiKey;
+        readonly string? azureOpenAIApiKeyName;
         readonly string? azureAISearchEndpoint;
-        readonly string? azureAISearchApiKey;
+        readonly string? azureAISearchApiKeyName;
+        readonly string? azureKeyVaultUri;
 
 
         public Orchestrator(IConfiguration configuration)
         {
             _configuration = configuration;
 
+            azureKeyVaultUri = _configuration["AzureKeyVault:Endpoint"];
             chatModelId = _configuration["AzureOpenAI:ChatModelId"];
             embeddingsModelId = _configuration["AzureOpenAI:EmbeddingsModelId"];
             azureOpenAIEndpoint = _configuration["AzureOpenAI:Endpoint"];
-            azureOpenAIApiKey = _configuration["AzureOpenAI:ApiKey"];
+            azureOpenAIApiKeyName = _configuration["AzureOpenAI:ApiKey"];
             azureAISearchEndpoint = _configuration["AzureAISearch:Endpoint"];
-            azureAISearchApiKey = _configuration["AzureAISearch:ApiKey"];
+            azureAISearchApiKeyName = _configuration["AzureAISearch:ApiKey"];
         }
 
         public async Task ChatAsync(CancellationToken ct)
         {
-            if (azureOpenAIEndpoint is null || chatModelId is null || azureOpenAIApiKey is null || embeddingsModelId is null || azureAISearchApiKey is null || azureAISearchEndpoint is null)
+            if (azureKeyVaultUri is null || azureOpenAIEndpoint is null || chatModelId is null || azureOpenAIApiKeyName is null || embeddingsModelId is null || azureAISearchApiKeyName is null || azureAISearchEndpoint is null)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Azure OpenAI credentials not found. Skipping example.");
                 return;
             }
 
+            var client = new SecretClient(new Uri(azureKeyVaultUri), new DefaultAzureCredential());
+            var azureOpenAIApiKey = await client.GetSecretAsync(azureOpenAIApiKeyName, cancellationToken: ct);
+            var azureAISearchApiKey = await client.GetSecretAsync(azureAISearchApiKeyName, cancellationToken: ct);
+
             // <RunningNativeFunction>
             var builder = Kernel.CreateBuilder()
-                                .AddAzureOpenAIChatCompletion(chatModelId, azureOpenAIEndpoint, azureOpenAIApiKey);
+                                .AddAzureOpenAIChatCompletion(chatModelId, azureOpenAIEndpoint, azureOpenAIApiKey.Value.Value);
             builder.Plugins.AddFromType<TimePlugin>();
             Kernel kernel = builder.Build();
 
             //https://github.com/microsoft/semantic-kernel/blob/main/dotnet/notebooks/06-memory-and-embeddings.ipynb
             var memoryBuilder = new MemoryBuilder();
-            memoryBuilder.WithAzureOpenAITextEmbeddingGeneration(embeddingsModelId, azureOpenAIEndpoint, azureOpenAIApiKey);
-            memoryBuilder.WithMemoryStore(new AzureAISearchMemoryStore(azureAISearchEndpoint, azureAISearchApiKey));
+            memoryBuilder.WithAzureOpenAITextEmbeddingGeneration(embeddingsModelId, azureOpenAIEndpoint, azureOpenAIApiKey.Value.Value);
+            memoryBuilder.WithMemoryStore(new AzureAISearchMemoryStore(azureAISearchEndpoint, azureAISearchApiKey.Value.Value));
             var memory = memoryBuilder.Build();
             kernel.ImportPluginFromObject(new TextMemoryPlugin(memory));
 
