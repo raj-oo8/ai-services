@@ -1,7 +1,4 @@
-﻿using Azure.AI.OpenAI;
-using Azure.Identity;
-using Azure.Search.Documents;
-using Azure.Search.Documents.Indexes;
+﻿using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using Microsoft.Extensions.Configuration;
 using Microsoft.SemanticKernel;
@@ -27,7 +24,6 @@ namespace Azure.AI.Services.SemanticKernel
         readonly string? azureAISearchEndpoint;
         readonly string? azureAISearchApiKeyName;
         readonly string? azureKeyVaultUri;
-
 
         public Orchestrator(IConfiguration configuration)
         {
