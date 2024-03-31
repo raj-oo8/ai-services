@@ -5,18 +5,18 @@
   "id": "${{TEAMS_APP_ID}}",
   "packageName": "com.microsoft.teams.extension",
   "developer": {
-    "name": "Teams App, Inc.",
-    "websiteUrl": "https://www.example.com",
-    "privacyUrl": "https://www.example.com/termofuse",
-    "termsOfUseUrl": "https://www.example.com/privacy"
+    "name": "Contoso Inc.",
+    "websiteUrl": "https://www.contoso.com",
+    "privacyUrl": "https://www.contoso.com/termofuse",
+    "termsOfUseUrl": "https://www.contoso.com/privacy"
   },
   "icons": {
-    "color": "ecogroceriescolor.png",
-    "outline": "ecogroceriestrnsprnt.png"
+    "color": "color.png",
+    "outline": "outline.png"
   },
   "name": {
-    "short": "EcoGroceries Call Center C#",
-    "full": "EcoGroceries Call Center Search message extension helping you find conversation records with clients"
+    "short": "Contoso Consulting",
+    "full": "Contoso Consulting search message extension helping you find conversation records with partners"
   },
   "description": {
     "short": "Message extension to find recorded conversation scripts with clients",
@@ -42,6 +42,24 @@
               "name": "searchQuery",
               "title": "Search Query",
               "description": "Search conversation records with clients in documents",
+              "inputType": "text"
+            }
+          ]
+        },
+        {
+          "id": "timeQuery",
+          "context": [
+            "compose",
+            "commandBox"
+          ],
+          "description": "Get current time",
+          "title": "Time",
+          "type": "query",
+          "parameters": [
+            {
+              "name": "timeQuery",
+              "title": "Time Query",
+              "description": "Get current time",
               "inputType": "text"
             }
           ]

@@ -1,8 +1,7 @@
-﻿using Azure.Search.Documents.Models;
+﻿using Azure.AI.OpenAI;
 using Azure.Search.Documents;
-using Azure.AI.OpenAI;
 using Azure.Search.Documents.Indexes;
-using Azure;
+using Azure.Search.Documents.Models;
 
 namespace Azure.AI.Services.Teams.Search
 {
