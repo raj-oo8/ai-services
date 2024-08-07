@@ -1,2 +1,2 @@
-# ai-services
-Artificial Intelligence Services
+# AI Samples
+Artificial Intelligence Samples
